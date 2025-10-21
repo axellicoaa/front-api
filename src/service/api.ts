@@ -92,9 +92,14 @@ export async function crearReserva(reserva: {
     body: JSON.stringify(reserva),
   });
 
-  if (!response.ok) throw new Error("Error al crear reserva");
+if (!response.ok) {
+  const errorData = await response.json();
+  throw new Error(errorData.mensaje || "Error al crear reserva");
+}
+
   return response.json();
 }
+
 // POST Crear sala
 export async function crearSala(sala: {
   nombreSala: string;
@@ -139,7 +144,6 @@ export async function getReservasPendientes() {
   return response.json();
 }
 
-// Aprobar reserva
 export async function aprobarReserva(reservaId: number, coordId: number) {
   const response = await fetch(
     `${API_URL}/aprobaciones/reserva/${reservaId}/coordinador/${coordId}/aprobar`,
@@ -149,7 +153,6 @@ export async function aprobarReserva(reservaId: number, coordId: number) {
   return response.json();
 }
 
-// Rechazar reserva
 export async function rechazarReserva(reservaId: number, coordId: number) {
   const response = await fetch(
     `${API_URL}/aprobaciones/reserva/${reservaId}/coordinador/${coordId}/rechazar`,
@@ -158,6 +161,7 @@ export async function rechazarReserva(reservaId: number, coordId: number) {
   if (!response.ok) throw new Error("Error al rechazar reserva");
   return response.json();
 }
+
 
 // GET historial de aprobaciones
 export async function getAprobaciones() {

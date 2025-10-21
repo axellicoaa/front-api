@@ -1,14 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 
 export default function Header() {
   const navigate = useNavigate();
-
   const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
             <svg
@@ -29,7 +31,18 @@ export default function Header() {
             Sistema de Reservas
           </span>
         </div>
-        {/* ✅ Nav solo si está logueado */}
+
+        {/* Botón Hamburguesa (solo en móviles) */}
+        {user && (
+          <button
+            className="md:hidden text-foreground focus:outline-none"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        )}
+
+        {/* Menú Desktop */}
         {user && (
           <nav className="hidden md:flex items-center gap-6 text-sm text-slate-600">
             <button
@@ -68,7 +81,9 @@ export default function Header() {
             )}
           </nav>
         )}
-        <div className="flex items-center gap-4">
+
+        {/* Botones Login/Logout Desktop */}
+        <div className="hidden md:flex items-center gap-4">
           {!user ? (
             <>
               <button
@@ -97,6 +112,74 @@ export default function Header() {
           )}
         </div>
       </div>
+
+      {/* Menú Mobile */}
+      {menuOpen && user && (
+        <div className="md:hidden bg-card border-t px-6 py-4 space-y-3">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="block w-full text-left hover:text-slate-900"
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => navigate("/salas")}
+            className="block w-full text-left hover:text-slate-900"
+          >
+            Salas
+          </button>
+          <button
+            onClick={() => navigate("/mis-reservas")}
+            className="block w-full text-left hover:text-slate-900"
+          >
+            Mis Reservas
+          </button>
+          {user.rol === "COORDINADOR" && (
+            <>
+              <button
+                onClick={() => navigate("/coordinador")}
+                className="block w-full text-left hover:text-slate-900"
+              >
+                Coordinador
+              </button>
+              <button
+                onClick={() => navigate("/reportes")}
+                className="block w-full text-left hover:text-slate-900"
+              >
+                Reportes
+              </button>
+            </>
+          )}
+          <div className="pt-3 border-t">
+            {!user ? (
+              <>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="block w-full text-left text-muted-foreground hover:text-foreground"
+                >
+                  Iniciar Sesión
+                </button>
+                <button
+                  onClick={() => navigate("/register")}
+                  className="block w-full text-left rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 mt-2"
+                >
+                  Registrarse
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
+                className="block w-full text-left rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 mt-2"
+              >
+                Cerrar Sesión
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSalas } from "../service/api";
+import { getSalas, getSalasDisponibles } from "../service/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
@@ -18,9 +18,19 @@ export default function Salas() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    getSalas().then(setSalas).catch(console.error);
-  }, []);
+  {
+    user?.rol === "USER" &&
+      useEffect(() => {
+        getSalasDisponibles().then(setSalas).catch(console.error);
+      }, []);
+  }
+
+  {
+    user?.rol === "COORDINADOR" &&
+      useEffect(() => {
+        getSalas().then(setSalas).catch(console.error);
+      }, []);
+  }
   // Fallbacks realistas (todas de Unsplash con tema "meeting room")
   const fallbacks = [
     "https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=1200&auto=format&fit=crop", // sala ejecutiva
@@ -52,25 +62,27 @@ export default function Salas() {
             </button>
           )}
         </div>
+
+        {/* Grid con altura igual para todas las tarjetas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {salas.map((sala) => (
             <div
               key={sala.id}
-              className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden transition-all"
+              className="bg-white rounded-xl shadow hover:shadow-lg overflow-hidden transition-all flex flex-col h-full"
             >
               <img
                 src={fallbacks[0]}
                 className="rounded-lg mb-6 w-full h-64 object-cover aspect-[16/9]"
                 onError={(e) => {
-                  // Cambia secuencialmente de fallback
                   const next =
                     fallbacks[++fallbackIndex] ??
-                    "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop"; // último seguro
+                    "https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=1200&auto=format&fit=crop";
                   e.currentTarget.src = next;
                 }}
               />
 
-              <div className="p-5">
+              {/* Contenido flexible */}
+              <div className="p-5 flex flex-col flex-1">
                 <h2 className="text-lg font-semibold mb-1">
                   {sala.nombreSala}
                 </h2>
@@ -78,7 +90,8 @@ export default function Salas() {
                   Capacidad: {sala.capacidadMaxima} personas
                 </p>
 
-                <div className="flex flex-wrap gap-2 mb-4">
+                {/* Equipamientos con altura reservada */}
+                <div className="flex flex-wrap gap-2 mb-4 min-h-[40px]">
                   {sala.equipamientos.map((e) => (
                     <span
                       key={e.id}
@@ -89,12 +102,15 @@ export default function Salas() {
                   ))}
                 </div>
 
-                <button
-                  onClick={() => navigate(`/salas/${sala.id}`)}
-                  className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 w-full "
-                >
-                  Ver Detalles {user?.rol === "USER" && <b> y Reservar </b>}
-                </button>
+                {/* Botón siempre al fondo */}
+                <div className="mt-auto">
+                  <button
+                    onClick={() => navigate(`/salas/${sala.id}`)}
+                    className="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 w-full"
+                  >
+                    Ver Detalles {user?.rol === "USER" && <b> y Reservar </b>}
+                  </button>
+                </div>
               </div>
             </div>
           ))}

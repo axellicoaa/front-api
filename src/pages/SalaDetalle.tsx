@@ -48,9 +48,9 @@ export default function SalaDetalle() {
         salaId: Number(id),
         ...data,
       });
-      toast.success("✅ Reserva creada correctamente");
-    } catch (err) {
-      toast.error("⚠️ No se pudo crear la reserva (posiblemente ocupada)");
+      toast.success("Reserva creada correctamente");
+    } catch (err: any) {
+      toast.error(err.message);
     }
   };
 
